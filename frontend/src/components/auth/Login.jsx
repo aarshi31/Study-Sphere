@@ -7,30 +7,51 @@ import { Input } from '../ui/input'
 import { RadioGroup } from '../ui/radio-group'
 import { Button } from '../ui/button'
 import { Link } from 'react-router-dom'
+import { toast, Toaster } from 'sonner';
 
 const Login = () => {
     const [input, setInput] = useState({
-        fullname: "",
+
         email: "",
         phonenumber: "",
         password: "",
         role: "",
-        file: ""
-
     });
+
     const changeEventHandler = (e) => {
         setInput({ ...input, [e.target.name]: e.target.value });
     }
 
-    const changeFileHandler = (e) => {
-        setInput({ ...input, file: e.target.files?.[0] });
-    }
+    const submitHandler = async (e) => {
+        e.preventDefault();
 
+
+        try {
+            const res = await axios.post(`${USER_API_END_POINT}/login`, input, {
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                withCredentials: true
+            });
+            if (res.data.success) {
+                navigate("/");
+                toast.success(res.data.message);
+
+            }
+        }
+
+        catch (error) {
+            console.log(error);
+            toast.error(error.response.data.message);
+
+        }
+
+    }
     return (
         <div>
             <Navbar />
             <div className='flex items-center justify-center min-h-screen max-w-7xl mx-auto'>
-                <form action="" className='w-1/10 border border-gray-200 rounded-md p-4 my-10'>
+                <form onSubmit={submitHandler} className='w-1/10 border border-gray-200 rounded-md p-4 my-10'>
                     <h1 className='font-bold text-xl mb-5'>Log In</h1>
 
 
@@ -38,13 +59,19 @@ const Login = () => {
                     <div className='my-2'>
                         <Label>Email</Label>
                         <Input type="email"
+                            value={input.email}
+                            name="email"
+                            onChange={changeEventHandler}
                             placeholder="eshat@gmail.com"
                         />
                     </div>
                     <div className='my-2'>
                         <Label>Password</Label>
                         <Input type="password"
-                            placeholder="eshat@gmail.com"
+                            value={input.password}
+                            name="password"
+                            onChange={changeEventHandler}
+                            placeholder="Enter your password"
                         />
                     </div>
                     <div className='flex items-center justify-between'>
@@ -54,6 +81,8 @@ const Login = () => {
                                     type="radio"
                                     name="role"
                                     value="student"
+                                    checked={input.role === 'student'}
+                                    onChange={changeEventHandler}
                                     className="cursor-pointer" />
                                 <Label htmlFor="r1">Student</Label>
                             </div>
@@ -62,6 +91,8 @@ const Login = () => {
                                     type="radio"
                                     name="role"
                                     value="tutor"
+                                    checked={input.role === 'tutor'}
+                                    onChange={changeEventHandler}
                                     className="cursor-pointer" />
                                 <Label htmlFor="r2">Tutor</Label>
                             </div>
